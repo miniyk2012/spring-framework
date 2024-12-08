@@ -3,7 +3,7 @@ package org.springframework.cn.tulingxueyuan.beans;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class CarFactory implements FactoryBean<Car> {
 
 

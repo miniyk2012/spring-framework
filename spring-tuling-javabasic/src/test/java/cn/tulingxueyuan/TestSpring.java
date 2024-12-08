@@ -27,10 +27,10 @@ public class TestSpring {
 		System.out.println(car);
 
 
-		Car car3 = (Car)ioc.getBean("carFactory");
-		System.out.println(car3);
-
-		CarFactory cf = (CarFactory)ioc.getBean("&carFactory");
-		System.out.println(cf);
+//		Car car3 = (Car)ioc.getBean("carFactory");
+//		System.out.println(car3);
+//
+//		CarFactory cf = (CarFactory)ioc.getBean("&carFactory");
+//		System.out.println(cf);
 	}
 }
