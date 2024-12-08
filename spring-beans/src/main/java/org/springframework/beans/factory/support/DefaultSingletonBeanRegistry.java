@@ -75,22 +75,27 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 
 	/** Cache of singleton objects: bean name to bean instance. */
+	// 一级缓存, 大名鼎鼎的单例缓冲池, 用于保存所有的单例bean
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name to ObjectFactory. */
+	// 三级缓存, 用户缓存, key为beanName, value为ObjectFactory(包装为早期对象)
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name to bean instance. */
+	// 二级缓存, 用户缓存我们的key为beanName, value是我们的早期对象(对象属性还没来得及赋值)
 	private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order. */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/** Names of beans that are currently in creation. */
+	/** 该集合用户缓存当前正在创建bean的名称 */
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	/** Names of beans currently excluded from in creation checks. */
+	/** 排查当前创建检查的 */
 	private final Set<String> inCreationCheckExclusions =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
@@ -178,17 +183,36 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		/**
+		 * 第一步: 尝试去一级缓存(单例缓存池中去获取对象, 一般从该Map中获取的对象是直接可以使用的)
+		 * IOC容器初始化加载单例bean的时候第一次进来时, 该map一般返回空
+		 */
 		// Quick check for existing instance without full singleton lock
 		Object singletonObject = this.singletonObjects.get(beanName);
+		/**
+		 * 若在一级缓存中没有获取到对象, 并且singletonCurrentlyInCreation这个set包含该beanName
+		 * IOC容器初始化加载单例bean第一次进来时, 该set一般返回空, 但是循环依赖的时候可以满足该条件
+		 */
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			singletonObject = this.earlySingletonObjects.get(beanName);
 			if (singletonObject == null && allowEarlyReference) {
 				synchronized (this.singletonObjects) {
 					// Consistent creation of early reference within full singleton lock
+					/**
+					 * 尝试从二级缓存中获取对象(二级缓存中的对象是一个早期对象)
+					 * 即: bean刚刚调用了构造方法, 还来不及给bean的属性赋值的对象
+					 */
 					singletonObject = this.singletonObjects.get(beanName);
+					/**
+					 * 二级缓存中也没有获取到对象, allowEarlyReference为true(参数是由上一个方法传递进来的true)
+					 */
 					if (singletonObject == null) {
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
+							/** 尝试从三级缓存中获取ObjectFactory对象. 这个对象是用来解决循环依赖的关键
+							 * 在IOC后期的过程中, 当bean调用了构造方法的时候, 把早期对象包装成一个ObjectFactory
+							 * 暴露到三级缓存中
+							*/
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
 								singletonObject = singletonFactory.getObject();
