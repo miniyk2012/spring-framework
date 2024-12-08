@@ -21,10 +21,10 @@ public class TestSpring {
 
 	@Test
 	public void test01() {
-//		Car car = ioc.getBean("car", Car.class);
-//		Car car2 = ioc.getBean("car", Car.class);
-//
-//		System.out.println(car);
+		Car car = ioc.getBean("car", Car.class);
+		Car car2 = ioc.getBean("car", Car.class);
+
+		System.out.println(car);
 
 
 		Car car3 = (Car)ioc.getBean("carFactory");
