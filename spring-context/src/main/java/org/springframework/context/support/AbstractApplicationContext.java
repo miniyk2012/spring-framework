@@ -537,11 +537,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
-				// 注册bean后置处理器
+				// 注册bean后置处理器, 在创建bean的后执行
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
-				// 初始化国际化资源处理器
+				// 初始化MessageSource组件(做国际化功能;消息绑定，消息解析)
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
@@ -549,7 +549,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
-				// 留个子类实现, springboot也是从这个方法去启动tomcat的
+				// 留个子类实现, 在容器刷新的时候可以自定义逻辑
+				// springboot也是从这个方法去启动tomcat的
 				onRefresh();
 
 				// Check for listener beans and register them.
@@ -557,7 +558,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
-				// 实例化我们剩余的单实例bean
+				// 初始化所有剩下的非懒加载的单例bean
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -666,6 +667,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
+		// 将ApplicationContextAwareProcessor添加到beanFactory中
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);

@@ -21,7 +21,7 @@ public class Car {
 
 
 	public Car() {
-		System.out.println("car初始化");
+		System.out.println("car实例化");
 	}
 
 	public Car(String name) {
@@ -38,6 +38,11 @@ public class Car {
 
 
 
-//	@Value("aaa")
+	@Value("aaa")
 	private String name = "兰博基尼";
+
+	@PostConstruct
+	public void init() {
+		System.out.println("car初始化方法");
+	}
 }
